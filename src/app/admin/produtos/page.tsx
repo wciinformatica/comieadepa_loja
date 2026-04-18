@@ -14,8 +14,8 @@ type AdminProduct = {
   name: string;
   slug: string;
   sku: string;
-  price: unknown;
-  salePrice: unknown | null;
+  price: number;
+  salePrice: number | null;
   stock: number;
   active: boolean;
   featured: boolean;
@@ -45,8 +45,7 @@ export default async function AdminProductsPage({
   if (params.status === "inativo") where.active = false;
   if (params.status === "baixo") where.stock = { lte: 5 };
 
-  const [products, total] = await Promise.all([
-    prisma.product.findMany({
+  const rawProducts = await prisma.product.findMany({
       where,
       include: {
         images: { where: { isPrimary: true }, take: 1 },
@@ -56,9 +55,25 @@ export default async function AdminProductsPage({
       orderBy: { updatedAt: "desc" },
       take,
       skip,
-    }),
-    prisma.product.count({ where }),
-  ]);
+    });
+
+  const [products, total]: [AdminProduct[], number] = [
+    rawProducts.map((p) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      sku: p.sku ?? "",
+      price: Number(p.price),
+      salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+      stock: p.stock,
+      active: p.active,
+      featured: p.featured,
+      images: p.images.map((img) => ({ url: img.url, alt: img.alt })),
+      category: p.category ? { name: p.category.name } : null,
+      department: p.department ? { name: p.department.name } : null,
+    })),
+    await prisma.product.count({ where }),
+  ];
 
   return (
     <div className="space-y-6">
