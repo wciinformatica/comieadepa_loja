@@ -9,6 +9,20 @@ import Image from "next/image";
 
 export const metadata: Metadata = { title: "Produtos — Admin" };
 
+type AdminProduct = {
+  id: string;
+  name: string;
+  slug: string;
+  sku: string;
+  price: { toNumber: () => number };
+  salePrice: { toNumber: () => number } | null;
+  stock: number;
+  active: boolean;
+  images: { url: string; alt?: string | null }[];
+  category: { name: string } | null;
+  department: { name: string } | null;
+};
+
 export default async function AdminProductsPage({
   searchParams,
 }: {
@@ -116,7 +130,7 @@ export default async function AdminProductsPage({
                   </td>
                 </tr>
               ) : (
-                products.map((product) => (
+                (products as AdminProduct[]).map((product: AdminProduct) => (
                   <tr key={product.id} className="hover:bg-slate-50 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
