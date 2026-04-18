@@ -159,7 +159,7 @@ export default async function AdminProductsPage({
                     </td>
                     <td className="px-4 py-3 font-mono text-slate-500 text-xs">{product.sku}</td>
                     <td className="px-4 py-3">
-                      <span className="text-slate-600">{product.category.name}</span>
+                      <span className="text-slate-600">{product.category?.name ?? "—"}</span>
                       {product.department && (
                         <p className="text-xs text-slate-400">{product.department.name}</p>
                       )}
