@@ -5,6 +5,16 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 
+type MyOrder = {
+  id: string;
+  orderNumber: string;
+  createdAt: Date;
+  total: { toNumber: () => number };
+  status: string;
+  items: { id: string }[];
+  payment: { method: string; status: string } | null;
+};
+
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendente",
   PROCESSING: "Processando",
@@ -46,7 +56,7 @@ export default async function MeusPedidosPage() {
         </div>
       ) : (
         <div className="space-y-3">
-          {orders.map((order) => (
+          {(orders as MyOrder[]).map((order: MyOrder) => (
             <div key={order.id} className="rounded-xl border border-gray-200 p-4 hover:bg-gray-50 transition-colors">
               <div className="flex items-start justify-between gap-3">
                 <div>
