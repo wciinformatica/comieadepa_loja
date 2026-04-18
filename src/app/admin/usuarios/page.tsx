@@ -4,6 +4,15 @@ import { redirect } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
 
+type AdminUser = {
+  id: string;
+  name: string | null;
+  email: string;
+  role: string;
+  createdAt: Date;
+  _count: { orders: number };
+};
+
 const ROLE_LABELS: Record<string, string> = {
   CUSTOMER: "Cliente",
   ADMIN: "Admin",
@@ -88,7 +97,7 @@ export default async function AdminUsuariosPage({
                 <td colSpan={5} className="px-6 py-10 text-center text-gray-500">Nenhum usuário encontrado.</td>
               </tr>
             ) : (
-              users.map((user) => (
+              (users as AdminUser[]).map((user: AdminUser) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name ?? "—"}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{user.email}</td>
