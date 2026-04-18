@@ -5,6 +5,8 @@ import { DepartmentsSection } from "@/components/home/DepartmentsSection";
 import { PromoSection } from "@/components/home/PromoSection";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = "force-dynamic";
+
 async function getData() {
   const [featuredProducts, categories, departments, banners] = await Promise.all([
     prisma.product.findMany({

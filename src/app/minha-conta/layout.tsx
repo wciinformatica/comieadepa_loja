@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { User, Package, MapPin, LogOut } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 const NAV_ITEMS = [
   { href: "/minha-conta", label: "Meus Dados", icon: User },
   { href: "/minha-conta/pedidos", label: "Meus Pedidos", icon: Package },
