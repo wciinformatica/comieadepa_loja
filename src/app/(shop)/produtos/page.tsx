@@ -5,6 +5,17 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Produtos" };
 
+type ProductListItem = {
+  id: string;
+  name: string;
+  slug: string;
+  price: { toNumber: () => number };
+  salePrice?: { toNumber: () => number } | null;
+  stock: number;
+  images: { url: string; alt?: string | null }[];
+  category: { name: string };
+};
+
 interface SearchParams {
   [key: string]: string | undefined;
   categoria?: string;
@@ -127,7 +138,7 @@ export default async function ProductsPage({
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-                {products.map((product) => (
+                {(products as ProductListItem[]).map((product: ProductListItem) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
               </div>
