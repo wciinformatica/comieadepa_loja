@@ -6,6 +6,14 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Financeiro — Admin" };
 
+type FinancialRecord = {
+  id: string;
+  date: Date;
+  type: string;
+  description: string;
+  amount: { toNumber: () => number };
+};
+
 async function getFinancialData(params: {
   periodo?: string;
   dataInicio?: string;
@@ -181,7 +189,7 @@ export default async function AdminFinancialPage({
                   </td>
                 </tr>
               ) : (
-                data.recentRecords.map((record) => (
+                (data.recentRecords as FinancialRecord[]).map((record: FinancialRecord) => (
                   <tr key={record.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 text-slate-500">{formatDate(record.date)}</td>
                     <td className="px-4 py-3">
