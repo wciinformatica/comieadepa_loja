@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import type { PrismaClient } from "@prisma/client";
 import { z } from "zod";
 import { slugify } from "@/lib/utils";
+
+type PrismaTx = Omit<typeof prisma, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 
 const variantSchema = z.object({
   id: z.string().optional(),
@@ -57,7 +58,7 @@ export async function PATCH(
   // Gera novo slug se o nome mudou
   const slugData = name ? { slug: slugify(name) } : {};
 
-  const product = await prisma.$transaction(async (tx: Omit<PrismaClient, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">) => {
+  const product = await prisma.$transaction(async (tx: PrismaTx) => {
     // Atualizar produto
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: any = { ...rest, ...(name ? { name } : {}), ...slugData };
