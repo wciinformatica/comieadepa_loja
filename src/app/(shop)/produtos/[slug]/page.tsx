@@ -44,11 +44,12 @@ export default async function ProductPage({ params }: Props) {
 
   if (!product) notFound();
 
-  const relatedProducts = product.relatedFrom.map((r) => r.related);
+  const safeProduct = product!;
+  const relatedProducts = safeProduct.relatedFrom.map((r: { related: typeof safeProduct.relatedFrom[0]["related"] }) => r.related);
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <ProductDetail product={product} />
+      <ProductDetail product={safeProduct} />
 
       {relatedProducts.length > 0 && (
         <div className="mt-16">
