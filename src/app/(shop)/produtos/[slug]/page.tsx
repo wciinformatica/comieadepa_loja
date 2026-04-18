@@ -57,7 +57,7 @@ export default async function ProductPage({ params }: Props) {
     category: { name: string };
   };
 
-  const relatedProducts = safeProduct.relatedFrom.map(
+  const relatedProducts: RelatedProduct[] = safeProduct.relatedFrom.map(
     (r: { related: RelatedProduct }) => r.related
   );
 
@@ -69,7 +69,7 @@ export default async function ProductPage({ params }: Props) {
         <div className="mt-16">
           <h2 className="text-xl font-bold text-slate-900 mb-6">Produtos Relacionados</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {relatedProducts.map((p) => (
+            {relatedProducts.map((p: RelatedProduct) => (
               <ProductCard key={p.id} product={p} />
             ))}
           </div>
