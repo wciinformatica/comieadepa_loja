@@ -50,20 +50,28 @@ export default async function ProductPage({ params }: Props) {
     id: string;
     name: string;
     slug: string;
-    price: { toNumber: () => number };
-    salePrice?: { toNumber: () => number } | null;
+    price: number;
+    salePrice?: number | null;
     stock: number;
     images: { url: string; alt?: string | null }[];
     category: { name: string };
   };
 
   const relatedProducts: RelatedProduct[] = safeProduct.relatedFrom.map(
-    (r: { related: RelatedProduct }) => r.related
+    (r: { related: { id: string; name: string; slug: string; price: unknown; salePrice?: unknown | null; stock: number; images: { url: string; alt?: string | null }[]; category: { name: string } } }) => ({
+      ...r.related,
+      price: Number(r.related.price),
+      salePrice: r.related.salePrice != null ? Number(r.related.salePrice) : null,
+    })
   );
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <ProductDetail product={safeProduct} />
+      <ProductDetail product={{
+        ...safeProduct,
+        price: Number(safeProduct.price),
+        salePrice: safeProduct.salePrice != null ? Number(safeProduct.salePrice) : null,
+      }} />
 
       {relatedProducts.length > 0 && (
         <div className="mt-16">

@@ -9,7 +9,7 @@ import type { Metadata } from "next";
 type OrderItemWithRelations = {
   id: string;
   quantity: number;
-  total: { toNumber: () => number };
+  total: unknown;
   product: { name: string; slug: string; images: { url: string; isPrimary: boolean }[] };
   variant: { name: string; value: string } | null;
 };
@@ -149,13 +149,13 @@ export default async function OrderConfirmationPage({
                 <p className="text-xs text-slate-500">Qtd: {item.quantity}</p>
               </div>
               <p className="font-semibold text-slate-900">
-                {formatCurrency(item.total.toNumber())}
+                {formatCurrency(Number(item.total))}
               </p>
             </div>
           ))}
           <div className="border-t pt-3 flex justify-between font-bold text-slate-900">
             <span>Total</span>
-            <span>{formatCurrency(safeOrder.total.toNumber())}</span>
+            <span>{formatCurrency(Number(safeOrder.total))}</span>
           </div>
         </div>
       </div>

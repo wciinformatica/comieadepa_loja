@@ -9,8 +9,8 @@ import AdminOrderActions from "./AdminOrderActions";
 type OrderItem = {
   id: string;
   quantity: number;
-  unitPrice: { toNumber: () => number };
-  total: { toNumber: () => number };
+  unitPrice: unknown;
+  total: unknown;
   product: { name: string; slug: string };
   variant: { name: string; value: string } | null;
 };
@@ -118,9 +118,9 @@ export default async function AdminPedidoDetailPage({ params }: { params: Promis
                 <td className="px-5 py-3 text-sm text-gray-900">{item.product.name}</td>
                 <td className="px-5 py-3 text-sm text-gray-500">{item.variant ? `${item.variant.name}: ${item.variant.value}` : "—"}</td>
                 <td className="px-5 py-3 text-sm text-gray-700 text-right">{item.quantity}</td>
-                <td className="px-5 py-3 text-sm text-gray-700 text-right">{formatCurrency(item.unitPrice.toNumber())}</td>
+                <td className="px-5 py-3 text-sm text-gray-700 text-right">{formatCurrency(Number(item.unitPrice))}</td>
                 <td className="px-5 py-3 text-sm font-medium text-gray-900 text-right">
-                  {formatCurrency(item.total.toNumber())}
+                  {formatCurrency(Number(item.total))}
                 </td>
               </tr>
             ))}
@@ -128,7 +128,7 @@ export default async function AdminPedidoDetailPage({ params }: { params: Promis
           <tfoot className="bg-gray-50">
             <tr>
               <td colSpan={4} className="px-5 py-3 text-sm font-semibold text-gray-900 text-right">Total</td>
-              <td className="px-5 py-3 text-sm font-bold text-gray-900 text-right">{formatCurrency(order.total.toNumber())}</td>
+              <td className="px-5 py-3 text-sm font-bold text-gray-900 text-right">{formatCurrency(Number(order.total))}</td>
             </tr>
           </tfoot>
         </table>

@@ -9,8 +9,8 @@ type ProductListItem = {
   id: string;
   name: string;
   slug: string;
-  price: { toNumber: () => number };
-  salePrice?: { toNumber: () => number } | null;
+  price: number;
+  salePrice?: number | null;
   stock: number;
   images: { url: string; alt?: string | null }[];
   category: { name: string };
@@ -139,7 +139,11 @@ export default async function ProductsPage({
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
                 {(products as ProductListItem[]).map((product: ProductListItem) => (
-                  <ProductCard key={product.id} product={product} />
+                  <ProductCard key={product.id} product={{
+                    ...product,
+                    price: Number(product.price),
+                    salePrice: product.salePrice != null ? Number(product.salePrice) : null,
+                  }} />
                 ))}
               </div>
 

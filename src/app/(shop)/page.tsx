@@ -32,7 +32,16 @@ async function getData() {
     }),
   ]);
 
-  return { featuredProducts, categories, departments, banners };
+  return {
+    featuredProducts: featuredProducts.map((p) => ({
+      ...p,
+      price: Number(p.price),
+      salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+    })),
+    categories,
+    departments,
+    banners,
+  };
 }
 
 export default async function HomePage() {

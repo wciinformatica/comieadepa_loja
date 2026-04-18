@@ -17,8 +17,8 @@ type Product = {
   sku: string | null;
   description: string | null;
   shortDescription: string | null;
-  price: { toNumber: () => number } | number;
-  salePrice: { toNumber: () => number } | number | null;
+  price: { toNumber?: () => number } | number;
+  salePrice: { toNumber?: () => number } | number | null;
   stock: number;
   featured: boolean;
   active: boolean;
@@ -82,11 +82,9 @@ export default function ProductForm({
           sku: product.sku ?? "",
           shortDescription: product.shortDescription ?? "",
           description: product.description ?? "",
-          price: typeof product.price === "object" ? product.price.toNumber() : product.price,
-          salePrice: product.salePrice
-            ? typeof product.salePrice === "object"
-              ? product.salePrice.toNumber()
-              : product.salePrice
+          price: Number(product.price),
+          salePrice: product.salePrice != null
+            ? Number(product.salePrice)
             : undefined,
           stock: product.stock,
           featured: product.featured,

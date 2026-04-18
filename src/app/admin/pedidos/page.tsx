@@ -11,7 +11,7 @@ type AdminOrder = {
   id: string;
   orderNumber: string;
   status: string;
-  total: { toNumber: () => number };
+  total: unknown;
   createdAt: Date;
   user: { name: string | null; email: string } | null;
   _count: { items: number };
@@ -147,7 +147,7 @@ export default async function AdminPedidosPage({
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{order._count.items} item(s)</td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                    {formatCurrency(order.total.toNumber())}
+                    {formatCurrency(Number(order.total))}
                   </td>
                   <td className="px-6 py-4">
                     <Badge variant={STATUS_VARIANTS[order.status] ?? "default"}>

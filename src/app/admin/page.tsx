@@ -10,7 +10,7 @@ type RecentOrder = {
   id: string;
   orderNumber: string;
   status: string;
-  total: { toNumber: () => number };
+  total: unknown;
   createdAt: Date;
   payment: { method: string; status: string } | null;
 };
@@ -53,7 +53,7 @@ async function getDashboardData() {
     paidOrders,
     pendingOrders,
     cancelledOrders,
-    monthRevenue: monthRevenue._sum.total?.toNumber() ?? 0,
+    monthRevenue: Number(monthRevenue._sum.total ?? 0),
     totalProducts,
     lowStockProducts,
     recentOrders,
@@ -197,7 +197,7 @@ export default async function AdminDashboard() {
                           {new Intl.DateTimeFormat("pt-BR").format(order.createdAt)}
                         </td>
                         <td className="py-3 font-semibold text-slate-800">
-                          {formatCurrency(order.total.toNumber())}
+                          {formatCurrency(Number(order.total))}
                         </td>
                         <td className="py-3">
                           <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${status.color}`}>

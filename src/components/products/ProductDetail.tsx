@@ -39,9 +39,13 @@ interface Product {
   variants: Variant[];
 }
 
-function toNumber(val: number | { toNumber: () => number } | null | undefined): number | null {
+function toNumber(val: number | { toNumber?: () => number } | null | undefined): number | null {
   if (val == null) return null;
-  return typeof val === "number" ? val : val.toNumber();
+  if (typeof val === "number") return val;
+  if (typeof (val as { toNumber?: () => number }).toNumber === "function") {
+    return (val as { toNumber: () => number }).toNumber();
+  }
+  return Number(val);
 }
 
 export function ProductDetail({ product }: { product: Product }) {

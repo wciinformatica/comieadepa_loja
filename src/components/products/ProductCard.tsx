@@ -18,8 +18,12 @@ interface Product {
   stock: number;
 }
 
-function toNumber(val: number | { toNumber: () => number }): number {
-  return typeof val === "number" ? val : val.toNumber();
+function toNumber(val: number | { toNumber: () => number } | { toString: () => string }): number {
+  if (typeof val === "number") return val;
+  if (typeof (val as { toNumber?: () => number }).toNumber === "function") {
+    return (val as { toNumber: () => number }).toNumber();
+  }
+  return Number(val);
 }
 
 export function ProductCard({ product }: { product: Product }) {

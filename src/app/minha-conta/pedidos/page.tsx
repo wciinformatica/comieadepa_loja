@@ -9,7 +9,7 @@ type MyOrder = {
   id: string;
   orderNumber: string;
   createdAt: Date;
-  total: { toNumber: () => number };
+  total: number | { toNumber: () => number } | { toString: () => string } | unknown;
   status: string;
   items: { id: string }[];
   payment: { method: string; status: string } | null;
@@ -65,7 +65,7 @@ export default async function MeusPedidosPage() {
                   <p className="text-sm text-gray-700 mt-1">{order.items.length} item(s)</p>
                 </div>
                 <div className="text-right space-y-1">
-                  <p className="font-semibold text-gray-900">{formatCurrency(order.total.toNumber())}</p>
+                  <p className="font-semibold text-gray-900">{formatCurrency(Number(order.total))}</p>
                   <Badge variant={STATUS_VARIANTS[order.status] ?? "default"}>
                     {STATUS_LABELS[order.status] ?? order.status}
                   </Badge>

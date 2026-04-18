@@ -11,7 +11,7 @@ type FinancialRecord = {
   date: Date;
   type: string;
   description: string;
-  amount: { toNumber: () => number };
+  amount: unknown;
 };
 
 async function getFinancialData(params: {
@@ -93,11 +93,11 @@ async function getFinancialData(params: {
   ]);
 
   return {
-    totalFaturado: totalFaturado._sum.total?.toNumber() ?? 0,
+    totalFaturado: Number(totalFaturado._sum.total ?? 0),
     totalFaturadoCount: totalFaturado._count,
-    totalPendente: totalPendente._sum.total?.toNumber() ?? 0,
+    totalPendente: Number(totalPendente._sum.total ?? 0),
     totalPendenteCount: totalPendente._count,
-    totalCancelado: totalCancelado._sum.total?.toNumber() ?? 0,
+    totalCancelado: Number(totalCancelado._sum.total ?? 0),
     totalCanceladoCount: totalCancelado._count,
     recentRecords,
     startDate,
@@ -217,7 +217,7 @@ export default async function AdminFinancialPage({
                         }
                       >
                         {record.type === "SALE" ? "+" : "-"}
-                        {formatCurrency(record.amount.toNumber())}
+                        {formatCurrency(Number(record.amount))}
                       </span>
                     </td>
                   </tr>

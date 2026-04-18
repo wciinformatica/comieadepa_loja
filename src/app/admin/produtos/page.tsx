@@ -14,8 +14,8 @@ type AdminProduct = {
   name: string;
   slug: string;
   sku: string;
-  price: { toNumber: () => number };
-  salePrice: { toNumber: () => number } | null;
+  price: unknown;
+  salePrice: unknown | null;
   stock: number;
   active: boolean;
   featured: boolean;
@@ -168,11 +168,11 @@ export default async function AdminProductsPage({
                       <div>
                         {product.salePrice && (
                           <p className="text-xs text-slate-400 line-through">
-                            {formatCurrency(product.price.toNumber())}
+                          {formatCurrency(Number(product.price))}
                           </p>
                         )}
                         <p className="font-semibold text-slate-900">
-                          {formatCurrency((product.salePrice ?? product.price).toNumber())}
+                          {formatCurrency(Number(product.salePrice ?? product.price))}
                         </p>
                       </div>
                     </td>
