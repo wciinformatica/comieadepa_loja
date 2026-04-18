@@ -18,6 +18,7 @@ type AdminProduct = {
   salePrice: { toNumber: () => number } | null;
   stock: number;
   active: boolean;
+  featured: boolean;
   images: { url: string; alt?: string | null }[];
   category: { name: string } | null;
   department: { name: string } | null;
