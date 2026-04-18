@@ -5,14 +5,14 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { QrCode, FileText, ExternalLink, ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
-import type { Prisma } from "@prisma/client";
 
-type OrderItemWithRelations = Prisma.OrderItemGetPayload<{
-  include: {
-    product: { select: { name: true; slug: true; images: { where: { isPrimary: true }; take: 1 } } };
-    variant: true;
-  };
-}>;
+type OrderItemWithRelations = {
+  id: string;
+  quantity: number;
+  total: { toNumber: () => number };
+  product: { name: string; slug: string; images: { url: string; isPrimary: boolean }[] };
+  variant: { name: string; value: string } | null;
+};
 
 export const metadata: Metadata = { title: "Confirmação do Pedido" };
 
