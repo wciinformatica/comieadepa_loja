@@ -5,6 +5,14 @@ import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { QrCode, FileText, ExternalLink, ChevronLeft } from "lucide-react";
 import type { Metadata } from "next";
+import type { Prisma } from "@prisma/client";
+
+type OrderItemWithRelations = Prisma.OrderItemGetPayload<{
+  include: {
+    product: { select: { name: true; slug: true; images: { where: { isPrimary: true }; take: 1 } } };
+    variant: true;
+  };
+}>;
 
 export const metadata: Metadata = { title: "Confirmação do Pedido" };
 
@@ -127,7 +135,7 @@ export default async function OrderConfirmationPage({
       <div className="bg-white rounded-2xl border p-6 mb-6">
         <h2 className="font-bold text-slate-900 mb-4">Itens do Pedido</h2>
         <div className="space-y-3">
-          {order.items.map((item) => (
+          {order.items.map((item: OrderItemWithRelations) => (
             <div key={item.id} className="flex justify-between text-sm">
               <div>
                 <p className="font-medium text-slate-800">{item.product.name}</p>
