@@ -40,7 +40,9 @@ export default async function OrderConfirmationPage({
 
   if (!order) notFound();
 
-  const payment = order.payment;
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  const safeOrder = order!;
+  const payment = safeOrder.payment;
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
@@ -51,8 +53,8 @@ export default async function OrderConfirmationPage({
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mb-2">Pedido Realizado!</h1>
         <p className="text-slate-500">
-          Pedido <span className="font-bold text-slate-800">{order.orderNumber}</span> criado com sucesso em{" "}
-          {formatDate(order.createdAt)}.
+          Pedido <span className="font-bold text-slate-800">{safeOrder.orderNumber}</span> criado com sucesso em{" "}
+          {formatDate(safeOrder.createdAt)}.
         </p>
       </div>
 
@@ -135,7 +137,7 @@ export default async function OrderConfirmationPage({
       <div className="bg-white rounded-2xl border p-6 mb-6">
         <h2 className="font-bold text-slate-900 mb-4">Itens do Pedido</h2>
         <div className="space-y-3">
-          {order.items.map((item: OrderItemWithRelations) => (
+          {(safeOrder.items as OrderItemWithRelations[]).map((item) => (
             <div key={item.id} className="flex justify-between text-sm">
               <div>
                 <p className="font-medium text-slate-800">{item.product.name}</p>
@@ -153,7 +155,7 @@ export default async function OrderConfirmationPage({
           ))}
           <div className="border-t pt-3 flex justify-between font-bold text-slate-900">
             <span>Total</span>
-            <span>{formatCurrency(order.total.toNumber())}</span>
+            <span>{formatCurrency(safeOrder.total.toNumber())}</span>
           </div>
         </div>
       </div>
