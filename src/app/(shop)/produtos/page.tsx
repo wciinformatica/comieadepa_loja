@@ -99,6 +99,17 @@ export default async function ProductsPage({
   const params = await searchParams;
   const { products, total, page, totalPages } = await getProducts(params);
 
+  const serializedProducts: ProductListItem[] = products.map((p) => ({
+    id: p.id,
+    name: p.name,
+    slug: p.slug,
+    price: Number(p.price),
+    salePrice: p.salePrice != null ? Number(p.salePrice) : null,
+    stock: p.stock,
+    images: p.images.map((img) => ({ url: img.url, alt: img.alt })),
+    category: { name: p.category.name },
+  }));
+
   const [categories, departments] = await Promise.all([
     prisma.category.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
     prisma.department.findMany({ where: { active: true }, orderBy: { sortOrder: "asc" } }),
@@ -138,12 +149,8 @@ export default async function ProductsPage({
           ) : (
             <>
               <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-4">
-                {(products as ProductListItem[]).map((product: ProductListItem) => (
-                  <ProductCard key={product.id} product={{
-                    ...product,
-                    price: Number(product.price),
-                    salePrice: product.salePrice != null ? Number(product.salePrice) : null,
-                  }} />
+                {serializedProducts.map((product) => (
+                  <ProductCard key={product.id} product={product} />
                 ))}
               </div>
 
