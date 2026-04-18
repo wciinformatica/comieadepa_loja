@@ -6,6 +6,15 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Dashboard — Admin" };
 
+type RecentOrder = {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: { toNumber: () => number };
+  createdAt: Date;
+  payment: { method: string; status: string } | null;
+};
+
 async function getDashboardData() {
   const today = new Date();
   const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
@@ -175,7 +184,7 @@ export default async function AdminDashboard() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {data.recentOrders.map((order) => {
+                  {(data.recentOrders as RecentOrder[]).map((order: RecentOrder) => {
                     const status = statusConfig[order.status as keyof typeof statusConfig] ?? statusConfig.PENDING;
                     return (
                       <tr key={order.id} className="hover:bg-slate-50">
