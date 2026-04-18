@@ -6,6 +6,15 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import AdminOrderActions from "./AdminOrderActions";
 
+type OrderItem = {
+  id: string;
+  quantity: number;
+  unitPrice: { toNumber: () => number };
+  total: { toNumber: () => number };
+  product: { name: string; slug: string };
+  variant: { name: string; value: string } | null;
+};
+
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendente",
   PROCESSING: "Processando",
@@ -104,7 +113,7 @@ export default async function AdminPedidoDetailPage({ params }: { params: Promis
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {order.items.map((item) => (
+            {(order.items as OrderItem[]).map((item: OrderItem) => (
               <tr key={item.id}>
                 <td className="px-5 py-3 text-sm text-gray-900">{item.product.name}</td>
                 <td className="px-5 py-3 text-sm text-gray-500">{item.variant ? `${item.variant.name}: ${item.variant.value}` : "—"}</td>
