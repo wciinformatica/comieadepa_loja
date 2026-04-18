@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { generateOrderNumber } from "@/lib/utils";
+
+type PrismaTx = Omit<typeof prisma, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
 import {
   createAsaasCustomer,
   createAsaasPayment,
@@ -75,7 +77,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Criar pedido em transação
-    const order = await prisma.$transaction(async (tx) => {
+    const order = await prisma.$transaction(async (tx: PrismaTx) => {
       const orderNumber = generateOrderNumber();
 
       const newOrder = await tx.order.create({
