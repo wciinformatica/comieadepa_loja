@@ -7,6 +7,16 @@ import Link from "next/link";
 
 const PAGE_SIZE = 20;
 
+type AdminOrder = {
+  id: string;
+  orderNumber: string;
+  status: string;
+  total: { toNumber: () => number };
+  createdAt: Date;
+  user: { name: string | null; email: string } | null;
+  _count: { items: number };
+};
+
 const STATUS_LABELS: Record<string, string> = {
   PENDING: "Pendente",
   PROCESSING: "Processando",
@@ -126,7 +136,7 @@ export default async function AdminPedidosPage({
                 </td>
               </tr>
             ) : (
-              orders.map((order) => (
+              (orders as AdminOrder[]).map((order: AdminOrder) => (
                 <tr key={order.id} className="hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm font-mono font-medium text-gray-900">
                     #{order.orderNumber}
