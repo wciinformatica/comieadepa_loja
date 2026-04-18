@@ -45,7 +45,21 @@ export default async function ProductPage({ params }: Props) {
   if (!product) notFound();
 
   const safeProduct = product!;
-  const relatedProducts = safeProduct.relatedFrom.map((r: { related: typeof safeProduct.relatedFrom[0]["related"] }) => r.related);
+
+  type RelatedProduct = {
+    id: string;
+    name: string;
+    slug: string;
+    price: { toNumber: () => number };
+    salePrice?: { toNumber: () => number } | null;
+    stock: number;
+    images: { url: string; alt?: string | null }[];
+    category: { name: string };
+  };
+
+  const relatedProducts = safeProduct.relatedFrom.map(
+    (r: { related: RelatedProduct }) => r.related
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
