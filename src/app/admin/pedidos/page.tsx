@@ -142,8 +142,8 @@ export default async function AdminPedidosPage({
                     #{order.orderNumber}
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm font-medium text-gray-900">{order.user.name}</div>
-                    <div className="text-xs text-gray-500">{order.user.email}</div>
+                    <div className="text-sm font-medium text-gray-900">{order.user?.name ?? "—"}</div>
+                    <div className="text-xs text-gray-500">{order.user?.email ?? "—"}</div>
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-700">{order._count.items} item(s)</td>
                   <td className="px-6 py-4 text-sm font-semibold text-gray-900">
