@@ -10,6 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const loginSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -108,6 +109,11 @@ function LoginForm() {
           Criar cadastro
         </Link>
       </p>
+      <p className="text-center text-xs text-slate-400 mt-2">
+        <Link href="/recuperar-senha" className="hover:text-slate-600 underline">
+          Esqueceu a senha?
+        </Link>
+      </p>
     </div>
   );
 }
@@ -117,10 +123,17 @@ export default function LoginPage() {
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-700 flex items-center justify-center text-white font-bold text-2xl mx-auto mb-4">
-            C
+          <div className="flex justify-center mb-3">
+            <Image
+              src="/img/logo.fw.png"
+              alt="COMIEADEPA Store"
+              width={200}
+              height={76}
+              unoptimized
+              className="object-contain"
+              priority
+            />
           </div>
-          <h1 className="text-2xl font-bold text-slate-900">COMIEADEPA Loja</h1>
           <p className="text-slate-500 text-sm mt-1">Entre na sua conta para continuar</p>
         </div>
         <Suspense fallback={<div className="bg-white rounded-2xl border shadow-sm p-8 text-center text-slate-400">Carregando...</div>}>

@@ -85,7 +85,7 @@ async function main() {
       id: "banner-congresso-2024",
       title: "Congresso 2024",
       subtitle: "Adquira já o seu fardamento oficial do congresso com qualidade e exclusividade.",
-      imageUrl: "",
+      imageUrl: "/img/slide01.fw.png",
       linkUrl: "/produtos?categoria=fardamentos",
       sortOrder: 1,
     },

@@ -1,29 +1,10 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import { Badge } from "@/components/ui/badge";
 import { formatDate } from "@/lib/utils";
+import { UsuariosTable } from "./UsuariosClient";
 
-type AdminUser = {
-  id: string;
-  name: string | null;
-  email: string;
-  role: string;
-  createdAt: Date;
-  _count: { orders: number };
-};
 
-const ROLE_LABELS: Record<string, string> = {
-  CUSTOMER: "Cliente",
-  ADMIN: "Admin",
-  SUPER_ADMIN: "Super Admin",
-};
-
-const ROLE_VARIANTS: Record<string, "default" | "secondary" | "success" | "warning"> = {
-  CUSTOMER: "secondary",
-  ADMIN: "default",
-  SUPER_ADMIN: "success",
-};
 
 export default async function AdminUsuariosPage({
   searchParams,
@@ -80,40 +61,17 @@ export default async function AdminUsuariosPage({
         </button>
       </form>
 
-      <div className="rounded-xl border border-gray-200 bg-white overflow-hidden shadow-sm">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Nome</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">E-mail</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Perfil</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedidos</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cadastro</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {users.length === 0 ? (
-              <tr>
-                <td colSpan={5} className="px-6 py-10 text-center text-gray-500">Nenhum usuário encontrado.</td>
-              </tr>
-            ) : (
-              (users as AdminUser[]).map((user: AdminUser) => (
-                <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name ?? "—"}</td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{user.email}</td>
-                  <td className="px-6 py-4">
-                    <Badge variant={ROLE_VARIANTS[user.role] ?? "secondary"}>
-                      {ROLE_LABELS[user.role] ?? user.role}
-                    </Badge>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-700">{user._count.orders}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500">{formatDate(user.createdAt)}</td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <UsuariosTable
+        users={users.map((u) => ({
+          id: u.id,
+          name: u.name,
+          email: u.email,
+          role: u.role,
+          createdAt: formatDate(u.createdAt),
+          orders: u._count.orders,
+        }))}
+        currentUserRole={session.user.role}
+      />
     </div>
   );
 }

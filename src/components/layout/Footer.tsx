@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, Phone, MapPin } from "lucide-react";
 
 export function Footer() {
@@ -11,14 +12,15 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Institucional */}
           <div className="lg:col-span-1">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-lg bg-yellow-500 flex items-center justify-center text-white font-bold text-lg">
-                C
-              </div>
-              <div>
-                <div className="font-bold text-white text-lg leading-tight">COMIEADEPA</div>
-                <div className="text-xs text-slate-400">Loja Oficial</div>
-              </div>
+            <div className="mb-4">
+              <Image
+                src="/img/logo.fw.png"
+                alt="COMIEADEPA Store"
+                width={150}
+                height={56}
+                unoptimized
+                className="object-contain brightness-0 invert"
+              />
             </div>
             <p className="text-sm text-slate-400 leading-relaxed mb-4">
               Loja oficial da Convenção de Ministros. Adquira fardamentos,

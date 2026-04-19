@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/utils";
 import { DollarSign, ShoppingCart, Package, TrendingUp, Clock, CheckCircle, XCircle } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { BarChart } from "@/components/admin/BarChart";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Dashboard — Admin" };
@@ -28,6 +29,7 @@ async function getDashboardData() {
     totalProducts,
     lowStockProducts,
     recentOrders,
+    last7DaysOrders,
   ] = await Promise.all([
     prisma.order.count(),
     prisma.order.count({ where: { status: "PAID" } }),
@@ -46,7 +48,31 @@ async function getDashboardData() {
         payment: { select: { method: true, status: true } },
       },
     }),
+    prisma.order.findMany({
+      where: {
+        createdAt: { gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000) },
+        status: { in: ["PAID", "DELIVERED", "SHIPPED", "PROCESSING"] },
+      },
+      select: { createdAt: true, total: true },
+    }),
   ]);
+
+  // Agrupar por dia (últimos 7 dias)
+  const chartData = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date();
+    d.setDate(d.getDate() - (6 - i));
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    const orders = last7DaysOrders.filter(
+      (o) => o.createdAt >= dayStart && o.createdAt < dayEnd
+    );
+    const value = orders.reduce((sum, o) => sum + Number(o.total), 0);
+    return {
+      label: d.toLocaleDateString("pt-BR", { weekday: "short" }),
+      value,
+      formatted: formatCurrency(value),
+    };
+  });
 
   return {
     totalOrders,
@@ -57,6 +83,7 @@ async function getDashboardData() {
     totalProducts,
     lowStockProducts,
     recentOrders,
+    chartData,
   };
 }
 
@@ -164,7 +191,22 @@ export default async function AdminDashboard() {
       )}
 
       {/* Pedidos recentes */}
-      <Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        {/* Gráfico 7 dias */}
+        <Card className="lg:col-span-1">
+          <CardHeader>
+            <CardTitle className="text-base">Faturamento — 7 dias</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <BarChart
+              data={data.chartData}
+              height={140}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Pedidos recentes */}
+        <Card className="lg:col-span-2">
         <CardHeader>
           <CardTitle className="text-base">Pedidos Recentes</CardTitle>
         </CardHeader>
@@ -222,6 +264,7 @@ export default async function AdminDashboard() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

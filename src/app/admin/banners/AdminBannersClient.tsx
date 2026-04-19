@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { PlusCircle, Pencil, Trash2, Check, X, ToggleLeft, ToggleRight } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, Check, X, ToggleLeft, ToggleRight, Upload, Loader2 } from "lucide-react";
 
 type Banner = {
   id: string;
@@ -23,6 +23,10 @@ type BannerForm = {
   sortOrder: number;
 };
 
+type Product = { id: string; name: string; slug: string };
+
+type Product = { id: string; name: string; slug: string };
+
 const EMPTY: BannerForm = {
   title: "",
   subtitle: "",
@@ -32,13 +36,32 @@ const EMPTY: BannerForm = {
   sortOrder: 0,
 };
 
-export default function AdminBannersClient({ banners }: { banners: Banner[] }) {
+export default function AdminBannersClient({ banners, products }: { banners: Banner[]; products: Product[] }) {
   const router = useRouter();
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<BannerForm>({ ...EMPTY });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleImageUpload(file: File) {
+    setUploading(true);
+    setError("");
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Erro no upload");
+      set("imageUrl", data.url);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Erro no upload");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   function set(key: keyof BannerForm, value: string | boolean | number) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -118,13 +141,60 @@ export default function AdminBannersClient({ banners }: { banners: Banner[] }) {
               <label className="block text-sm font-medium text-gray-700 mb-1">Subtítulo</label>
               <input value={form.subtitle} onChange={(e) => set("subtitle", e.target.value)} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL da Imagem *</label>
-              <input value={form.imageUrl} onChange={(e) => set("imageUrl", e.target.value)} required className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="https://..." />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Imagem do Banner *</label>
+              <div className="flex gap-4 items-start">
+                {/* Preview */}
+                {form.imageUrl ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={form.imageUrl} alt="Preview" className="h-20 w-36 rounded-lg object-cover border border-gray-200 shrink-0" />
+                ) : (
+                  <div className="h-20 w-36 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center shrink-0 text-gray-400">
+                    <Upload className="w-6 h-6" />
+                  </div>
+                )}
+                <div className="flex-1 space-y-2">
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp"
+                    className="hidden"
+                    onChange={(e) => { const f = e.target.files?.[0]; if (f) handleImageUpload(f); }}
+                  />
+                  <button
+                    type="button"
+                    disabled={uploading}
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                  >
+                    {uploading ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</> : <><Upload className="w-3.5 h-3.5" /> Enviar arquivo</>}
+                  </button>
+                  <input
+                    value={form.imageUrl}
+                    onChange={(e) => set("imageUrl", e.target.value)}
+                    placeholder="ou cole a URL aqui (https://...)"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm"
+                  />
+                </div>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Link de Destino</label>
-              <input value={form.linkUrl} onChange={(e) => set("linkUrl", e.target.value)} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" placeholder="/produtos?..." />
+              <select
+                value={form.linkUrl}
+                onChange={(e) => set("linkUrl", e.target.value)}
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="">— Nenhum —</option>
+                <optgroup label="Página de produtos">
+                  <option value="/produtos">Todos os produtos</option>
+                </optgroup>
+                <optgroup label="Produto específico">
+                  {products.map((p) => (
+                    <option key={p.id} value={`/produtos/${p.slug}`}>{p.name}</option>
+                  ))}
+                </optgroup>
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ordem</label>
@@ -155,6 +225,10 @@ export default function AdminBannersClient({ banners }: { banners: Banner[] }) {
         ) : (
           banners.map((banner) => (
             <div key={banner.id} className={`rounded-xl border bg-white p-4 shadow-sm ${!banner.active ? "opacity-60" : ""}`}>
+              {banner.imageUrl && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={banner.imageUrl} alt={banner.title} className="w-full h-28 object-cover rounded-lg mb-3 border border-gray-100" />
+              )}
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1 min-w-0">
                   <p className="font-medium text-gray-900 truncate">{banner.title}</p>

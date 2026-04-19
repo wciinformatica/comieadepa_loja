@@ -3,7 +3,13 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
-const schema = z.object({ name: z.string().min(2).optional(), description: z.string().optional(), active: z.boolean().optional() });
+const schema = z.object({
+  name: z.string().min(2).optional(),
+  description: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  active: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).optional(),
+});
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();

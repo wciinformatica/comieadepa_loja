@@ -75,6 +75,7 @@ model User {
   sessions Session[]
   orders   Order[]
   addresses Address[]
+  passwordResetTokens PasswordResetToken[]
 }
 
 model Address {
@@ -128,20 +129,20 @@ model Product {
   id               String    @id @default(cuid())
   name             String
   slug             String    @unique
-  description      String    @db.Text
+  description      String?   @db.Text
   shortDescription String?
-  sku              String    @unique
+  sku              String?   @unique
   price            Decimal   @db.Decimal(10, 2)
   salePrice        Decimal?  @db.Decimal(10, 2)
   stock            Int       @default(0)
   active           Boolean   @default(true)
   featured         Boolean   @default(false)
-  categoryId       String
+  categoryId       String?
   departmentId     String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  category      Category          @relation(fields: [categoryId], references: [id])
+  category      Category?         @relation(fields: [categoryId], references: [id])
   department    Department?       @relation(fields: [departmentId], references: [id])
   images        ProductImage[]
   variants      ProductVariant[]
@@ -225,6 +226,11 @@ model Order {
   discount        Decimal     @default(0) @db.Decimal(10, 2)
   total           Decimal     @db.Decimal(10, 2)
   notes           String?     @db.Text
+  // Snapshot do cliente/endereço no momento do pedido
+  customerName    String?
+  customerEmail   String?
+  customerPhone   String?
+  shippingSnapshot String?    @db.Text // JSON com endereço completo
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -308,4 +314,29 @@ model FinancialRecord {
   paymentId   String?
   date        DateTime @default(now())
   createdAt   DateTime @default(now())
+}
+
+// ─────────────────────────────────────────────
+// CONFIGURAÇÕES
+// ─────────────────────────────────────────────
+
+model Setting {
+  key       String   @id
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+// RECUPERAÇÃO DE SENHA
+// ─────────────────────────────────────────────
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

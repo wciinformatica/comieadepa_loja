@@ -27,10 +27,16 @@ export default async function EditarProdutoPage({ params }: { params: Promise<{ 
 
   if (!product) notFound();
 
+  const serialized = {
+    ...product,
+    price: Number(product.price),
+    salePrice: product.salePrice != null ? Number(product.salePrice) : null,
+  };
+
   return (
     <div className="p-6 space-y-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold text-gray-900">Editar Produto</h1>
-      <ProductForm categories={categories} departments={departments} product={product} />
+      <ProductForm categories={categories} departments={departments} product={serialized} />
     </div>
   );
 }

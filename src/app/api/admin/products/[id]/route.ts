@@ -16,7 +16,10 @@ const variantSchema = z.object({
 
 const imageSchema = z.object({
   id: z.string().optional(),
-  url: z.string().url("URL inválida"),
+  url: z.string().refine(
+    (v) => v.startsWith("/") || z.string().url().safeParse(v).success,
+    { message: "Informe uma URL válida ou um caminho como /img/foto.png" }
+  ),
   alt: z.string().optional().nullable(),
   sortOrder: z.number().optional(),
 });
@@ -55,6 +58,11 @@ export async function PATCH(
 
   const { variants, images, name, ...rest } = parsed.data;
 
+  // Converter strings vazias em null/undefined para FKs opcionais
+  if (rest.categoryId === "") rest.categoryId = undefined;
+  if (rest.departmentId === "") rest.departmentId = null;
+  if (rest.sku === "") rest.sku = undefined;
+
   // Gera novo slug se o nome mudou
   const slugData = name ? { slug: slugify(name) } : {};
 
@@ -86,6 +94,7 @@ export async function PATCH(
             ...img,
             id: undefined,
             productId: id,
+            isPrimary: idx === 0,
             sortOrder: img.sortOrder ?? idx,
           })),
         });

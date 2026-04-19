@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
+import { FinanceiroChart, CsvExportButton } from "./FinanceiroClient";
+import { FinanceiroChart, CsvExportButton } from "./FinanceiroClient";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Financeiro — Admin" };
@@ -99,7 +101,9 @@ async function getFinancialData(params: {
     totalPendenteCount: totalPendente._count,
     totalCancelado: Number(totalCancelado._sum.total ?? 0),
     totalCanceladoCount: totalCancelado._count,
+    chartData,
     recentRecords,
+    chartData,
     startDate,
     endDate,
   };
@@ -162,14 +166,36 @@ export default async function AdminFinancialPage({
         <div className="bg-white rounded-xl border p-6">
           <p className="text-sm text-slate-500 mb-1">Cancelamentos</p>
           <p className="text-2xl font-bold text-red-500">{formatCurrency(data.totalCancelado)}</p>
-          <p className="text-xs text-slate-400 mt-1">{data.totalCanceladoCount} pedido(s) cancelado(s)</p>
+          <p
+
+      {/* Gráfico */}
+      <FinanceiroChart data={data.chartData} /> className="text-xs text-slate-400 mt-1">{data.totalCanceladoCount} pedido(s) cancelado(s)</p>
         </div>
       </div>
 
+      {/* Gráfico */}
+      <FinanceiroChart data={data.chartData} />
+  <CsvExportButton
+            records={(data.recentRecords as FinancialRecord[]).map((r) => ({
+              date: formatDate(r.date),
+              type: r.type,
+              description: r.description,
+              amount: Number(r.amount),
+            }))}
+          />
+        
       {/* Registros financeiros */}
       <div className="bg-white rounded-xl border overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">
           <h2 className="font-semibold text-slate-900">Registros do Período</h2>
+          <CsvExportButton
+            records={(data.recentRecords as FinancialRecord[]).map((r) => ({
+              date: formatDate(r.date),
+              type: r.type,
+              description: r.description,
+              amount: Number(r.amount),
+            }))}
+          />
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

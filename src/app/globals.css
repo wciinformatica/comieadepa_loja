@@ -3,23 +3,28 @@
 /* ─── Design Tokens — COMIEADEPA Loja ─────────────────── */
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #1a0509;
   --card: #ffffff;
-  --card-foreground: #0f172a;
-  --primary: #1e293b;
+  --card-foreground: #1a0509;
+  --primary: #5C0A14;
   --primary-foreground: #ffffff;
-  --secondary: #f1f5f9;
-  --secondary-foreground: #0f172a;
-  --muted: #f8fafc;
+  --secondary: #f5f0f0;
+  --secondary-foreground: #1a0509;
+  --muted: #faf7f7;
   --muted-foreground: #64748b;
-  --accent: #fef9c3;
-  --accent-foreground: #713f12;
+  --accent: #fff3d4;
+  --accent-foreground: #5C0A14;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
-  --border: #e2e8f0;
-  --input: #e2e8f0;
-  --ring: #eab308;
+  --border: #e2e0e0;
+  --input: #e2e0e0;
+  --ring: #C8921A;
   --radius: 0.5rem;
+  /* Brand extras */
+  --brand-maroon: #5C0A14;
+  --brand-maroon-dark: #420810;
+  --brand-gold: #C8921A;
+  --brand-gold-light: #E8B94A;
 }
 
 @theme inline {

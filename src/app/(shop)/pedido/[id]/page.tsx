@@ -2,8 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { QrCode, FileText, ExternalLink, ChevronLeft } from "lucide-react";
+import { QrCode, FileText, ExternalLink, ChevronLeft, MapPin, User } from "lucide-react";
 import type { Metadata } from "next";
 
 type OrderItemWithRelations = {
@@ -44,6 +43,12 @@ export default async function OrderConfirmationPage({
   const safeOrder = order!;
   const payment = safeOrder.payment;
 
+  // Endereço de entrega do snapshot
+  let shippingAddress: Record<string, string> | null = null;
+  if (safeOrder.shippingSnapshot) {
+    try { shippingAddress = JSON.parse(safeOrder.shippingSnapshot as string); } catch { /* ignore */ }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8 max-w-2xl">
       {/* Sucesso */}
@@ -56,6 +61,33 @@ export default async function OrderConfirmationPage({
           Pedido <span className="font-bold text-slate-800">{safeOrder.orderNumber}</span> criado com sucesso em{" "}
           {formatDate(safeOrder.createdAt)}.
         </p>
+      </div>
+
+      {/* Dados do cliente e entrega */}
+      <div className="bg-white rounded-2xl border p-6 mb-6 grid sm:grid-cols-2 gap-6">
+        {safeOrder.customerName && (
+          <div>
+            <h2 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <User className="h-4 w-4 text-slate-500" /> Cliente
+            </h2>
+            <p className="text-sm text-slate-700">{safeOrder.customerName}</p>
+            {safeOrder.customerEmail && <p className="text-sm text-slate-500">{safeOrder.customerEmail}</p>}
+            {safeOrder.customerPhone && <p className="text-sm text-slate-500">{safeOrder.customerPhone}</p>}
+          </div>
+        )}
+        {shippingAddress && (
+          <div>
+            <h2 className="font-bold text-slate-900 mb-2 flex items-center gap-2">
+              <MapPin className="h-4 w-4 text-slate-500" /> Entrega
+            </h2>
+            <p className="text-sm text-slate-700">
+              {shippingAddress.street}, {shippingAddress.number}
+              {shippingAddress.complement ? `, ${shippingAddress.complement}` : ""}
+            </p>
+            <p className="text-sm text-slate-500">{shippingAddress.district} — {shippingAddress.city}/{shippingAddress.state}</p>
+            <p className="text-sm text-slate-500">CEP: {shippingAddress.zipCode}</p>
+          </div>
+        )}
       </div>
 
       {/* Informações de pagamento */}

@@ -7,6 +7,8 @@ import { slugify } from "@/lib/utils";
 const schema = z.object({
   name: z.string().min(2),
   description: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  sortOrder: z.number().int().min(0).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -32,6 +34,8 @@ export async function POST(req: NextRequest) {
       name: parsed.data.name,
       slug,
       description: parsed.data.description,
+      imageUrl: parsed.data.imageUrl,
+      sortOrder: parsed.data.sortOrder ?? 0,
     },
   });
 

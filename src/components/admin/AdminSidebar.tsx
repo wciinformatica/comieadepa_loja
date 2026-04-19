@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
@@ -10,7 +11,7 @@ import {
   BarChart3,
   Tag,
   Building2,
-  Image,
+  Image as ImageIcon,
   Users,
   ChevronLeft,
   ChevronRight,
@@ -27,7 +28,7 @@ const navItems = [
   { href: "/admin/pedidos", label: "Pedidos", icon: ShoppingCart },
   { href: "/admin/pagamentos", label: "Pagamentos", icon: DollarSign },
   { href: "/admin/financeiro", label: "Financeiro", icon: BarChart3 },
-  { href: "/admin/banners", label: "Banners", icon: Image },
+  { href: "/admin/banners", label: "Banners", icon: ImageIcon },
   { href: "/admin/usuarios", label: "Usuários", icon: Users },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
@@ -44,15 +45,17 @@ export function AdminSidebar() {
       )}
     >
       {/* Logo */}
-      <div className={cn("flex items-center gap-3 p-4 border-b border-white/10", collapsed && "justify-center")}>
-        <div className="h-9 w-9 rounded-lg bg-yellow-500 flex items-center justify-center text-white font-bold text-base shrink-0">
-          C
-        </div>
+      <div className={cn("flex flex-col items-center gap-1 px-3 py-3 border-b border-white/10", !collapsed && "items-start")}>
+        <Image
+          src="/img/logo.fw.png"
+          alt="COMIEADEPA Store"
+          width={collapsed ? 40 : 140}
+          height={collapsed ? 40 : 52}
+          unoptimized
+          className="object-contain"
+        />
         {!collapsed && (
-          <div>
-            <div className="font-bold text-sm leading-tight">COMIEADEPA</div>
-            <div className="text-xs text-slate-400">Painel Admin</div>
-          </div>
+          <span className="text-[10px] text-slate-400 tracking-wider uppercase px-1">Painel Admin</span>
         )}
       </div>
 

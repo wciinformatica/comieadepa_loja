@@ -6,7 +6,9 @@ import { z } from "zod";
 const schema = z.object({
   name: z.string().min(2).optional(),
   description: z.string().optional(),
+  imageUrl: z.string().url().optional(),
   active: z.boolean().optional(),
+  sortOrder: z.number().int().min(0).optional(),
 });
 
 export async function PATCH(

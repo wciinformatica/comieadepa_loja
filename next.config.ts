@@ -6,6 +6,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "sandbox.asaas.com" },
       { protocol: "https", hostname: "uploadthing.com" },
+      { protocol: "https", hostname: "kgznmsqfepottjvqutnz.supabase.co" },
     ],
   },
 };

@@ -48,7 +48,7 @@ export default async function AdminProductsPage({
   const rawProducts = await prisma.product.findMany({
       where,
       include: {
-        images: { where: { isPrimary: true }, take: 1 },
+        images: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }], take: 1 },
         category: true,
         department: true,
       },
@@ -220,7 +220,7 @@ export default async function AdminProductsPage({
                           <Eye className="h-4 w-4" />
                         </Link>
                         <Link
-                          href={`/admin/produtos/${product.id}`}
+                          href={`/admin/produtos/${product.id}/editar`}
                           className="h-8 w-8 rounded-lg hover:bg-yellow-50 flex items-center justify-center text-slate-500 hover:text-yellow-700 transition-colors"
                           title="Editar"
                         >

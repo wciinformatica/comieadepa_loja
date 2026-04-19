@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type Resolver } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { zodResolver } from "@hookform/resolvers/zod" ;
 import { z } from "zod";
-import { PlusCircle, Trash2 } from "lucide-react";
+import { PlusCircle, Trash2, Upload, Loader2 } from "lucide-react";
 
 type Category = { id: string; name: string };
 type Department = { id: string; name: string };
@@ -73,6 +73,8 @@ export default function ProductForm({
   const {
     register,
     handleSubmit,
+    watch,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema) as Resolver<FormData>,
@@ -95,9 +97,47 @@ export default function ProductForm({
       : { active: true, featured: false, stock: 0 },
   });
 
+  const watchedName = watch("name");
+
+  // Auto-gera SKU a partir do nome (somente em criação ou se SKU estiver vazio)
+  useEffect(() => {
+    if (isEdit) return;
+    const base = (watchedName ?? "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toUpperCase()
+      .replace(/[^A-Z0-9\s]/g, "")
+      .trim()
+      .split(/\s+/)
+      .slice(0, 3)
+      .map((w) => w.slice(0, 3))
+      .join("-");
+    if (base) {
+      setValue("sku", `${base}-${String(Date.now()).slice(-4)}`);
+    }
+  }, [watchedName, isEdit, setValue]);
+
   const [variants, setVariants] = useState<Variant[]>(product?.variants ?? []);
   const [images, setImages] = useState<Image[]>(product?.images ?? []);
   const [serverError, setServerError] = useState("");
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  async function uploadFile(file: File, index: number) {
+    setUploadingIndex(index);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? "Erro no upload");
+      updateImage(index, "url", body.url);
+    } catch (err: unknown) {
+      setServerError(err instanceof Error ? err.message : "Erro no upload");
+    } finally {
+      setUploadingIndex(null);
+    }
+  }
 
   // Variantes
   function addVariant() {
@@ -154,8 +194,14 @@ export default function ProductForm({
             {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">SKU</label>
-            <input {...register("sku")} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              SKU <span className="text-xs text-gray-400">(gerado automaticamente)</span>
+            </label>
+            <input
+              {...register("sku")}
+              readOnly
+              className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-500 cursor-not-allowed select-none"
+            />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Estoque *</label>
@@ -163,12 +209,17 @@ export default function ProductForm({
             {errors.stock && <p className="mt-1 text-xs text-red-600">{errors.stock.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Preço (R$) *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Preço Normal (R$) *
+            </label>
             <input type="number" step="0.01" min={0} {...register("price", { valueAsNumber: true })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
             {errors.price && <p className="mt-1 text-xs text-red-600">{errors.price.message}</p>}
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Preço De (R$)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Preço Promocional (R$){" "}
+              <span className="text-xs text-gray-400">(opcional — aparece riscado na loja)</span>
+            </label>
             <input type="number" step="0.01" min={0} {...register("salePrice", { valueAsNumber: true })} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
@@ -216,20 +267,67 @@ export default function ProductForm({
         </div>
         {images.length === 0 && <p className="text-sm text-gray-500">Nenhuma imagem adicionada.</p>}
         {images.map((img, i) => (
-          <div key={i} className="flex gap-3 items-center">
-            <input
-              value={img.url}
-              onChange={(e) => updateImage(i, "url", e.target.value)}
-              placeholder="URL da imagem (https://...)"
-              className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <input
-              value={img.alt ?? ""}
-              onChange={(e) => updateImage(i, "alt", e.target.value)}
-              placeholder="Alt text"
-              className="w-40 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-            <button type="button" onClick={() => removeImage(i)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg">
+          <div key={i} className="flex gap-3 items-start">
+            {/* Preview */}
+            {img.url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={img.url}
+                alt={img.alt ?? ""}
+                className="h-16 w-16 rounded-lg object-cover border border-gray-200 shrink-0"
+              />
+            ) : (
+              <div className="h-16 w-16 rounded-lg border-2 border-dashed border-gray-300 flex items-center justify-center shrink-0 text-gray-400">
+                <Upload className="w-5 h-5" />
+              </div>
+            )}
+
+            <div className="flex-1 space-y-2">
+              {/* Botão de upload */}
+              <div className="flex gap-2 items-center">
+                <input
+                  ref={(el) => { fileInputRefs.current[i] = el; }}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) uploadFile(file, i);
+                  }}
+                />
+                <button
+                  type="button"
+                  disabled={uploadingIndex === i}
+                  onClick={() => fileInputRefs.current[i]?.click()}
+                  className="flex items-center gap-1.5 rounded-lg border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {uploadingIndex === i ? (
+                    <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Enviando...</>
+                  ) : (
+                    <><Upload className="w-3.5 h-3.5" /> Enviar arquivo</>
+                  )}
+                </button>
+                <span className="text-xs text-gray-400">ou cole a URL abaixo</span>
+              </div>
+
+              {/* URL manual */}
+              <input
+                value={img.url}
+                onChange={(e) => updateImage(i, "url", e.target.value)}
+                placeholder="https://... ou deixe vazio após upload"
+                className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+              {/* Alt text */}
+              <input
+                value={img.alt ?? ""}
+                onChange={(e) => updateImage(i, "alt", e.target.value)}
+                placeholder="Descrição da imagem (alt text)"
+                className="w-full rounded-lg border border-gray-300 px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <button type="button" onClick={() => removeImage(i)} className="p-1.5 text-red-500 hover:bg-red-50 rounded-lg mt-1 shrink-0">
               <Trash2 className="w-4 h-4" />
             </button>
           </div>

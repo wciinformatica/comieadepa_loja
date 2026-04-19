@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/lib/auth";
 import { generateOrderNumber } from "@/lib/utils";
 
 type PrismaTx = Omit<typeof prisma, "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends">;
@@ -11,13 +12,26 @@ import {
 } from "@/lib/asaas";
 import { z } from "zod";
 
+const addressSchema = z.object({
+  street: z.string(),
+  number: z.string(),
+  complement: z.string().optional(),
+  district: z.string(),
+  city: z.string(),
+  state: z.string(),
+  zipCode: z.string(),
+  label: z.string().optional(),
+});
+
 const orderSchema = z.object({
   customer: z.object({
     name: z.string().min(3),
     email: z.string().email(),
     cpf: z.string().min(11),
     phone: z.string().min(10),
-  }),
+  }).optional(),
+  addressId: z.string().optional(),
+  newAddress: addressSchema.optional(),
   items: z.array(
     z.object({
       productId: z.string(),
@@ -43,7 +57,85 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { customer, items, total, paymentMethod } = parsed.data;
+    const { customer, addressId, newAddress, items, total, paymentMethod } = parsed.data;
+
+    // Resolver usuário: logado ou guest
+    const session = await auth();
+    let userId: string;
+    let customerName: string;
+    let customerEmail: string;
+    let customerPhone: string;
+    let customerCpf: string;
+
+    if (session?.user?.id) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { id: true, name: true, email: true, phone: true, cpf: true },
+      });
+      if (!dbUser) {
+        return NextResponse.json({ message: "Usuário não encontrado" }, { status: 404 });
+      }
+      userId = dbUser.id;
+      customerName = dbUser.name ?? customer?.name ?? "";
+      customerEmail = dbUser.email ?? customer?.email ?? "";
+      customerPhone = dbUser.phone ?? customer?.phone ?? "";
+      customerCpf = dbUser.cpf ?? customer?.cpf ?? "";
+    } else {
+      // Guest: requer dados do cliente
+      if (!customer) {
+        return NextResponse.json({ message: "Dados do cliente obrigatórios para compra como visitante" }, { status: 400 });
+      }
+      customerName = customer.name;
+      customerEmail = customer.email;
+      customerPhone = customer.phone;
+      customerCpf = customer.cpf;
+
+      // Buscar ou criar usuário guest pelo email
+      const existingUser = await prisma.user.findUnique({ where: { email: customerEmail } });
+      if (existingUser) {
+        userId = existingUser.id;
+      } else {
+        const newUser = await prisma.user.create({
+          data: {
+            name: customerName,
+            email: customerEmail,
+            phone: customerPhone,
+            cpf: customerCpf,
+            role: "CUSTOMER",
+          },
+        });
+        userId = newUser.id;
+      }
+    }
+
+    // Resolver endereço de entrega
+    let shippingSnapshot: string | null = null;
+    let resolvedAddressId: string | undefined = addressId;
+
+    if (addressId) {
+      const addr = await prisma.address.findUnique({ where: { id: addressId } });
+      if (addr) shippingSnapshot = JSON.stringify(addr);
+    } else if (newAddress) {
+      shippingSnapshot = JSON.stringify(newAddress);
+      // Salvar endereço para usuários logados
+      if (session?.user?.id) {
+        const created = await prisma.address.create({
+          data: {
+            userId,
+            label: newAddress.label ?? "Entrega",
+            street: newAddress.street,
+            number: newAddress.number,
+            complement: newAddress.complement,
+            district: newAddress.district,
+            city: newAddress.city,
+            state: newAddress.state,
+            zipCode: newAddress.zipCode,
+            isDefault: false,
+          },
+        });
+        resolvedAddressId = created.id;
+      }
+    }
 
     // Verificar estoque
     for (const item of items) {
@@ -60,7 +152,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Criar ou recuperar cliente no ASAAS
-    const cleanCpf = customer.cpf.replace(/\D/g, "");
+    const cleanCpf = customerCpf.replace(/\D/g, "");
     let asaasCustomerId: string;
 
     const existing = await findAsaasCustomerByCpf(cleanCpf);
@@ -68,10 +160,10 @@ export async function POST(req: NextRequest) {
       asaasCustomerId = existing.data[0].id;
     } else {
       const created = await createAsaasCustomer({
-        name: customer.name,
+        name: customerName,
         cpfCnpj: cleanCpf,
-        email: customer.email,
-        mobilePhone: customer.phone.replace(/\D/g, ""),
+        email: customerEmail,
+        mobilePhone: customerPhone.replace(/\D/g, ""),
       });
       asaasCustomerId = created.id;
     }
@@ -83,7 +175,12 @@ export async function POST(req: NextRequest) {
       const newOrder = await tx.order.create({
         data: {
           orderNumber,
-          userId: "guest", // pode ser substituído pelo ID do usuário logado
+          userId,
+          customerName,
+          customerEmail,
+          customerPhone,
+          shippingSnapshot,
+          ...(resolvedAddressId ? { addressId: resolvedAddressId } : {}),
           subtotal: total,
           total,
           status: "PENDING",

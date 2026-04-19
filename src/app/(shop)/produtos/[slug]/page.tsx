@@ -32,7 +32,7 @@ export default async function ProductPage({ params }: Props) {
         include: {
           related: {
             include: {
-              images: { where: { isPrimary: true }, take: 1 },
+              images: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }], take: 1 },
               category: true,
             },
           },

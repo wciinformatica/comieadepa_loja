@@ -4,7 +4,12 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { slugify } from "@/lib/utils";
 
-const schema = z.object({ name: z.string().min(2), description: z.string().optional() });
+const schema = z.object({
+  name: z.string().min(2),
+  description: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  sortOrder: z.number().int().min(0).optional(),
+});
 
 export async function POST(req: NextRequest) {
   const session = await auth();
@@ -20,7 +25,13 @@ export async function POST(req: NextRequest) {
   if (existing) return NextResponse.json({ error: "Já existe um departamento com esse nome" }, { status: 409 });
 
   const department = await prisma.department.create({
-    data: { name: parsed.data.name, slug, description: parsed.data.description },
+    data: {
+      name: parsed.data.name,
+      slug,
+      description: parsed.data.description,
+      imageUrl: parsed.data.imageUrl,
+      sortOrder: parsed.data.sortOrder ?? 0,
+    },
   });
   return NextResponse.json(department, { status: 201 });
 }

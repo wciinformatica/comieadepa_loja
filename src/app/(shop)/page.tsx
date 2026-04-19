@@ -3,6 +3,7 @@ import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { CategoriesSection } from "@/components/home/CategoriesSection";
 import { DepartmentsSection } from "@/components/home/DepartmentsSection";
 import { PromoSection } from "@/components/home/PromoSection";
+import { BenefitsStrip } from "@/components/home/BenefitsStrip";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,7 @@ async function getData() {
       where: { active: true, featured: true },
       take: 8,
       include: {
-        images: { where: { isPrimary: true }, take: 1 },
+        images: { orderBy: [{ isPrimary: "desc" }, { sortOrder: "asc" }], take: 1 },
         category: true,
       },
       orderBy: { createdAt: "desc" },
@@ -52,6 +53,7 @@ export default async function HomePage() {
   return (
     <>
       <HeroSection banners={banners} />
+      <BenefitsStrip />
       <FeaturedProducts products={featuredProducts} />
       <CategoriesSection categories={categories} />
       <DepartmentsSection departments={departments} />

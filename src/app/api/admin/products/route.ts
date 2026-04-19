@@ -7,17 +7,24 @@ import { slugify } from "@/lib/utils";
 
 const productSchema = z.object({
   name: z.string().min(2),
-  description: z.string(),
-  shortDescription: z.string().optional(),
-  sku: z.string().min(2),
+  description: z.string().optional().nullable(),
+  shortDescription: z.string().optional().nullable(),
+  sku: z.string().optional().nullable(),
   price: z.number().positive(),
   salePrice: z.number().positive().nullable().optional(),
   stock: z.number().int().min(0),
-  categoryId: z.string(),
+  categoryId: z.string().optional().nullable(),
   departmentId: z.string().optional().nullable(),
   active: z.boolean().default(true),
   featured: z.boolean().default(false),
-  images: z.array(z.object({ url: z.string().url(), alt: z.string().optional(), isPrimary: z.boolean().default(false) })).optional(),
+  images: z.array(z.object({
+    url: z.string().refine(
+      (v) => v.startsWith("/") || z.string().url().safeParse(v).success,
+      { message: "Informe uma URL válida ou um caminho como /img/foto.png" }
+    ),
+    alt: z.string().optional(),
+    isPrimary: z.boolean().default(false),
+  })).optional(),
 });
 
 async function requireAdmin() {
@@ -60,13 +67,26 @@ export async function POST(req: NextRequest) {
     }
 
     const { images, ...productData } = parsed.data;
-    const slug = slugify(productData.name);
+
+    // Converter strings vazias em undefined para FKs opcionais
+    if (!productData.categoryId) productData.categoryId = undefined;
+    if (!productData.departmentId) productData.departmentId = undefined;
+    if (!productData.sku) productData.sku = undefined;
+
+    const baseSlug = slugify(productData.name);
+
+    // Garante slug único
+    let slug = baseSlug;
+    let suffix = 1;
+    while (await prisma.product.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${suffix++}`;
+    }
 
     const product = await prisma.product.create({
       data: {
         ...productData,
         slug,
-        images: images
+        images: images && images.length > 0
           ? {
               create: images.map((img, i) => ({
                 url: img.url,
@@ -83,6 +103,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(product, { status: 201 });
   } catch (err) {
     console.error("[POST /api/admin/products]", err);
-    return NextResponse.json({ error: "Erro interno" }, { status: 500 });
+    const message = process.env.NODE_ENV === "development" && err instanceof Error ? err.message : "Erro interno";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

@@ -53,7 +53,7 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <Link href={`/produtos/${product.slug}`} className="group">
-      <div className="bg-white rounded-xl border hover:border-yellow-400 hover:shadow-lg transition-all overflow-hidden flex flex-col h-full">
+      <div className="bg-white rounded-xl border hover:border-amber-700 hover:shadow-lg transition-all overflow-hidden flex flex-col h-full" style={{ borderColor: "#e5e7eb" }}>
         {/* Imagem */}
         <div className="relative aspect-square overflow-hidden bg-slate-50">
           {image?.url ? (
@@ -98,7 +98,8 @@ export function ProductCard({ product }: { product: Product }) {
           {inStock && (
             <button
               onClick={handleAddToCart}
-              className="absolute bottom-0 left-0 right-0 bg-yellow-500 hover:bg-yellow-600 text-white py-2.5 text-sm font-semibold flex items-center justify-center gap-2 translate-y-full group-hover:translate-y-0 transition-transform duration-200"
+              className="absolute bottom-0 left-0 right-0 text-white py-2.5 text-sm font-semibold flex items-center justify-center gap-2 translate-y-full group-hover:translate-y-0 transition-transform duration-200"
+              style={{ backgroundColor: "#5C0A14" }}
             >
               <ShoppingCart className="h-4 w-4" />
               Adicionar ao Carrinho
@@ -109,7 +110,7 @@ export function ProductCard({ product }: { product: Product }) {
         {/* Info */}
         <div className="p-3 flex-1 flex flex-col">
           <p className="text-xs text-slate-400 mb-1">{product.category.name}</p>
-          <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-2 flex-1 group-hover:text-yellow-700 transition-colors">
+          <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-2 flex-1 transition-colors" style={{ color: undefined }}>
             {product.name}
           </h3>
 
@@ -128,7 +129,8 @@ export function ProductCard({ product }: { product: Product }) {
             {inStock ? (
               <button
                 onClick={handleAddToCart}
-                className="sm:hidden h-8 w-8 rounded-lg bg-yellow-500 hover:bg-yellow-600 flex items-center justify-center text-white transition-colors"
+                className="sm:hidden h-8 w-8 rounded-lg flex items-center justify-center text-white transition-colors"
+                style={{ backgroundColor: "#5C0A14" }}
                 aria-label="Adicionar ao carrinho"
               >
                 <ShoppingCart className="h-4 w-4" />
