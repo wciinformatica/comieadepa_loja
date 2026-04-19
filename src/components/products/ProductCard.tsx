@@ -14,7 +14,7 @@ interface Product {
   price: number | { toNumber: () => number };
   salePrice?: number | { toNumber: () => number } | null;
   images: Array<{ url: string; alt?: string | null }>;
-  category: { name: string };
+  category: { name: string } | null;
   stock: number;
 }
 
@@ -109,7 +109,7 @@ export function ProductCard({ product }: { product: Product }) {
 
         {/* Info */}
         <div className="p-3 flex-1 flex flex-col">
-          <p className="text-xs text-slate-400 mb-1">{product.category.name}</p>
+          <p className="text-xs text-slate-400 mb-1">{product.category?.name}</p>
           <h3 className="text-sm font-semibold text-slate-800 line-clamp-2 mb-2 flex-1 transition-colors" style={{ color: undefined }}>
             {product.name}
           </h3>

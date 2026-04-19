@@ -25,8 +25,6 @@ type BannerForm = {
 
 type Product = { id: string; name: string; slug: string };
 
-type Product = { id: string; name: string; slug: string };
-
 const EMPTY: BannerForm = {
   title: "",
   subtitle: "",

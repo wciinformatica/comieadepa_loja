@@ -12,7 +12,7 @@ interface Product {
   price: number | { toNumber: () => number };
   salePrice?: number | { toNumber: () => number } | null;
   images: Array<{ url: string; alt?: string | null }>;
-  category: { name: string };
+  category: { name: string } | null;
   stock: number;
 }
 

@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { auth } from "@/lib/auth";
 
@@ -11,7 +11,7 @@ function getSupabase() {
   return createClient(url, key);
 }
 
-async function ensureBucket(supabase: ReturnType<typeof createClient>) {
+async function ensureBucket(supabase: ReturnType<typeof getSupabase>) {
   const { data: buckets } = await supabase.storage.listBuckets();
   const exists = buckets?.some((b) => b.name === BUCKET);
   if (!exists) {
@@ -22,7 +22,7 @@ async function ensureBucket(supabase: ReturnType<typeof createClient>) {
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session || (session.user.role !== "ADMIN" && session.user.role !== "SUPER_ADMIN")) {
-    return NextResponse.json({ error: "Não autorizado" }, { status: 401 });
+    return NextResponse.json({ error: "NÃ£o autorizado" }, { status: 401 });
   }
 
   const formData = await req.formData();
@@ -34,11 +34,11 @@ export async function POST(req: NextRequest) {
 
   const allowed = ["image/jpeg", "image/png", "image/webp", "image/gif"];
   if (!allowed.includes(file.type)) {
-    return NextResponse.json({ error: "Tipo de arquivo não permitido. Use JPG, PNG ou WebP." }, { status: 400 });
+    return NextResponse.json({ error: "Tipo de arquivo nÃ£o permitido. Use JPG, PNG ou WebP." }, { status: 400 });
   }
 
   if (file.size > 5 * 1024 * 1024) {
-    return NextResponse.json({ error: "Arquivo muito grande. Máximo 5MB." }, { status: 400 });
+    return NextResponse.json({ error: "Arquivo muito grande. MÃ¡ximo 5MB." }, { status: 400 });
   }
 
   const supabase = getSupabase();
@@ -62,3 +62,4 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ url: publicUrl });
 }
+

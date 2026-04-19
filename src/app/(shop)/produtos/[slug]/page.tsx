@@ -57,20 +57,29 @@ export default async function ProductPage({ params }: Props) {
     category: { name: string };
   };
 
-  const relatedProducts: RelatedProduct[] = safeProduct.relatedFrom.map(
-    (r: { related: { id: string; name: string; slug: string; price: unknown; salePrice?: unknown | null; stock: number; images: { url: string; alt?: string | null }[]; category: { name: string } } }) => ({
+  const relatedProducts: RelatedProduct[] = safeProduct.relatedFrom.map((r) => ({
       ...r.related,
       price: Number(r.related.price),
       salePrice: r.related.salePrice != null ? Number(r.related.salePrice) : null,
-    })
-  );
+      category: r.related.category ?? { name: "" },
+    }));
 
   return (
     <div className="container mx-auto px-4 py-8">
       <ProductDetail product={{
-        ...safeProduct,
+        id: safeProduct.id,
+        name: safeProduct.name,
+        slug: safeProduct.slug,
+        description: safeProduct.description ?? "",
+        shortDescription: safeProduct.shortDescription,
+        sku: safeProduct.sku ?? "",
         price: Number(safeProduct.price),
         salePrice: safeProduct.salePrice != null ? Number(safeProduct.salePrice) : null,
+        stock: safeProduct.stock,
+        images: safeProduct.images,
+        category: { name: safeProduct.category?.name ?? "", slug: safeProduct.category?.slug ?? "" },
+        department: safeProduct.department ? { name: safeProduct.department.name, slug: safeProduct.department.slug } : null,
+        variants: safeProduct.variants ?? [],
       }} />
 
       {relatedProducts.length > 0 && (

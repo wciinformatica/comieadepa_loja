@@ -109,7 +109,7 @@ export default async function ProductsPage({
     salePrice: p.salePrice != null ? Number(p.salePrice) : null,
     stock: p.stock,
     images: p.images.map((img) => ({ url: img.url, alt: img.alt })),
-    category: { name: p.category.name },
+    category: { name: p.category?.name ?? "" },
   }));
 
   const [categories, departments] = await Promise.all([

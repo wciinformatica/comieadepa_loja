@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 type AdminUser = {
   id: string;
   name: string | null;
-  email: string;
+  email: string | null;
   role: string;
   createdAt: string;
   orders: number;
@@ -68,7 +68,7 @@ export function UsuariosTable({
       );
       closeModal();
     } catch {
-      setError("Erro de conexão.");
+      setError("Erro de conexÃ£o.");
     } finally {
       setLoading(false);
     }
@@ -97,20 +97,20 @@ export function UsuariosTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Perfil</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pedidos</th>
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cadastro</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ações</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">AÃ§Ãµes</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-200">
             {list.length === 0 ? (
               <tr>
                 <td colSpan={6} className="px-6 py-10 text-center text-gray-500">
-                  Nenhum usuário encontrado.
+                  Nenhum usuÃ¡rio encontrado.
                 </td>
               </tr>
             ) : (
               list.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name ?? "—"}</td>
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">{user.name ?? "â€”"}</td>
                   <td className="px-6 py-4 text-sm text-gray-700">{user.email}</td>
                   <td className="px-6 py-4">
                     <Badge variant={ROLE_VARIANTS[user.role] ?? "secondary"}>
@@ -142,7 +142,7 @@ export function UsuariosTable({
           <div className="bg-white rounded-xl shadow-xl w-full max-w-sm p-6 space-y-4">
             <h2 className="text-lg font-bold text-gray-900">Editar Perfil</h2>
             <p className="text-sm text-gray-600">
-              Usuário: <span className="font-medium">{editUser.name ?? editUser.email}</span>
+              UsuÃ¡rio: <span className="font-medium">{editUser.name ?? editUser.email}</span>
             </p>
 
             <div>
@@ -184,3 +184,4 @@ export function UsuariosTable({
     </>
   );
 }
+

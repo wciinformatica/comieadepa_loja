@@ -3,7 +3,6 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { FinanceiroChart, CsvExportButton } from "./FinanceiroClient";
-import { FinanceiroChart, CsvExportButton } from "./FinanceiroClient";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = { title: "Financeiro — Admin" };
@@ -94,6 +93,32 @@ async function getFinancialData(params: {
     }),
   ]);
 
+  // Gerar chartData: vendas por dia dos últimos 30 dias dentro do período
+  const paidOrders = await prisma.order.findMany({
+    where: { status: "PAID", createdAt: dateFilter },
+    select: { createdAt: true, total: true },
+  });
+
+  const days = Math.min(
+    30,
+    Math.ceil((endDate.getTime() - startDate.getTime()) / 86400000) + 1
+  );
+  const chartData = Array.from({ length: days }, (_, i) => {
+    const d = new Date(startDate);
+    d.setDate(startDate.getDate() + i);
+    const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
+    const orders = paidOrders.filter(
+      (o) => o.createdAt >= dayStart && o.createdAt < dayEnd
+    );
+    const value = orders.reduce((sum, o) => sum + Number(o.total), 0);
+    return {
+      label: d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }),
+      value,
+      formatted: formatCurrency(value),
+    };
+  });
+
   return {
     totalFaturado: Number(totalFaturado._sum.total ?? 0),
     totalFaturadoCount: totalFaturado._count,
@@ -103,7 +128,6 @@ async function getFinancialData(params: {
     totalCanceladoCount: totalCancelado._count,
     chartData,
     recentRecords,
-    chartData,
     startDate,
     endDate,
   };
@@ -166,24 +190,13 @@ export default async function AdminFinancialPage({
         <div className="bg-white rounded-xl border p-6">
           <p className="text-sm text-slate-500 mb-1">Cancelamentos</p>
           <p className="text-2xl font-bold text-red-500">{formatCurrency(data.totalCancelado)}</p>
-          <p
-
-      {/* Gráfico */}
-      <FinanceiroChart data={data.chartData} /> className="text-xs text-slate-400 mt-1">{data.totalCanceladoCount} pedido(s) cancelado(s)</p>
+          <p className="text-xs text-slate-400 mt-1">{data.totalCanceladoCount} pedido(s) cancelado(s)</p>
         </div>
       </div>
 
       {/* Gráfico */}
       <FinanceiroChart data={data.chartData} />
-  <CsvExportButton
-            records={(data.recentRecords as FinancialRecord[]).map((r) => ({
-              date: formatDate(r.date),
-              type: r.type,
-              description: r.description,
-              amount: Number(r.amount),
-            }))}
-          />
-        
+
       {/* Registros financeiros */}
       <div className="bg-white rounded-xl border overflow-hidden">
         <div className="p-4 border-b flex items-center justify-between">

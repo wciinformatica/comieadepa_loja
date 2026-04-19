@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useCartStore } from "@/store/cartStore";
+import { useCartStore, CartItem } from "@/store/cartStore";
 import { formatCurrency } from "@/lib/utils";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -79,7 +79,7 @@ function OrderSummary({
   items,
   subtotal,
 }: {
-  items: ReturnType<typeof useCartStore>["items"];
+  items: CartItem[];
   subtotal: number;
 }) {
   return (
