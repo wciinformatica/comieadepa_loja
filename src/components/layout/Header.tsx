@@ -63,7 +63,7 @@ export function Header() {
         <div className="container mx-auto flex items-center justify-between px-4 py-1.5 text-xs gap-2">
           <div className="hidden sm:flex items-center gap-1.5" style={{ color: "#E8B94A" }}>
             <Bell className="h-3 w-3 shrink-0" />
-            <span className="whitespace-nowrap">Farda Congresso Geral 2026&nbsp;|&nbsp;Peça já a sua!</span>
+            <span className="whitespace-nowrap">Produtos Oficiais COMIEADEPA&nbsp;|&nbsp;Vista a identidade da nossa missão!</span>
           </div>
           <div className="flex items-center gap-1.5 text-slate-200 mx-auto sm:mx-0">
             <Truck className="h-3 w-3 shrink-0" style={{ color: "#E8B94A" }} />
