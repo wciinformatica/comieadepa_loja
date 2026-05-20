@@ -27,7 +27,7 @@ async function getData() {
     prisma.department.findMany({
       where: { active: true },
       orderBy: { sortOrder: "asc" },
-      take: 4,
+      take: 8,
     }),
     prisma.banner.findMany({
       where: { active: true },
